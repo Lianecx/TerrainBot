@@ -7,7 +7,7 @@ const client = new Discord.Client({ intents: [Discord.Intents.FLAGS.GUILDS] });
 const bree = new Bree({
     jobs: [
         {
-            name: 'updateSubs',
+            name: 'update_subs',
             interval: 'every week'
         },
     ],
