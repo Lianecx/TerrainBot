@@ -1,6 +1,6 @@
 const Discord = require('discord.js');
 const Bree = require('bree');
-const { token, apikey } = require('./config.json');
+const { token } = require('./config.json');
 
 const client = new Discord.Client({ intents: [Discord.Intents.FLAGS.GUILDS] });
 
@@ -8,7 +8,8 @@ const bree = new Bree({
     jobs: [
         {
             name: 'update_subs',
-            interval: '1 day'
+            timeout: "1 second",
+            interval: '1 day',
         },
     ],
 });
