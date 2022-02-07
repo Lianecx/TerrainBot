@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/Lianecx/TerrainBot/issues"
   },
-  "homepage": "https://github.com/Lianecx/TerrainBot#readme"
+  "homepage": "https://github.com/Lianecx/TerrainBot#readme",
+  "dependencies": {
+    "discord.js": "^13.6.0"
+  }
 }
