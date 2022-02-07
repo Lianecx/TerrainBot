@@ -21,4 +21,4 @@ client.once('ready', async () => {
 
 client.login(token);
 
-module.exports({ client });
+module.exports = { client };
