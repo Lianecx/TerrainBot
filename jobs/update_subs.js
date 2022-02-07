@@ -10,6 +10,6 @@ fetch(`https://www.googleapis.com/youtube/v3/channels?part=statistics&id=${youtu
     }).then(async data => {
         const subs = parseInt(data["items"][0].statistics.subscriberCount).toLocaleString();
 
-        const subchannel = getClient().channels.fetch(channels.subcount);
+        const subchannel = getClient().channels.cache.get(channels.subcount);
         subchannel.setName(`👀 Subscribers: ${subs}`);
     });
