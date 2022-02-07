@@ -8,7 +8,7 @@ const bree = new Bree({
     jobs: [
         {
             name: 'update_subs',
-            timeout: "1 second",
+            timeout: "1 seconds",
             interval: '1 day',
         },
     ],
@@ -17,9 +17,13 @@ const bree = new Bree({
 client.once('ready', async () => {
     console.log(`Bot logged in as ${client.user.tag}.`);
     client.user.setActivity('over TheTerrain', { type: 'WATCHING' });
+
     bree.start();
 });
 
 client.login(token);
 
-module.exports = { client };
+function getClient() {
+    return client;
+}
+module.exports = { getClient };
