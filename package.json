@@ -20,6 +20,6 @@
   "dependencies": {
     "bree": "^7.1.5",
     "discord.js": "^13.6.0",
-    "node-fetch": "^3.2.0"
+    "node-fetch": "^2.6.7"
   }
 }
