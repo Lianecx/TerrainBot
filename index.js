@@ -1,10 +1,19 @@
 const Discord = require('discord.js');
 const Bree = require('bree');
 const { token } = require('./config.json');
+const { updateSubs } = require("./jobs/update_subs");
 
 const client = new Discord.Client({ intents: ['GUILDS'] });
 
+const youtubeId = 'UCLlVS9RRl8nC2Yirs1YbrOg'; //TheTerrains youtube Id
+
 const bree = new Bree({
+    worker: {
+        workerData: {
+            client: client,
+            youtubeId: youtubeId,
+        },
+    },
     jobs: [
         {
             name: 'update_subs',
