@@ -8,7 +8,7 @@ const bree = new Bree({
     jobs: [
         {
             name: 'update_subs',
-            interval: 'every week'
+            interval: '1 day'
         },
     ],
 });
