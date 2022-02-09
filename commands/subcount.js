@@ -6,12 +6,13 @@ const config = require('../config.json');
 module.exports = {
     name: 'subcount',
     description: 'Gets TheTerrain\'s current youtube subcount!',
+    options: {
+        defer: true
+    },
     data: new SlashCommandBuilder()
             .setName('subcount')
             .setDescription('Gets TheTerrain\'s current youtube subcount!'),
     async execute(interaction, client) {
-        await interaction.deferReply();
-
         console.log(`${interaction.member.user.tag} executed /subcount`);
 
         const subs = await youtube.getSubcount(config.youtubeId);

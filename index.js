@@ -59,8 +59,27 @@ client.on('interactionCreate', async interaction => {
             const command = client.commands.get(interaction.commandName);
             if (!command) return;
 
-            command.execute(interaction, client);
+            if(command.options?.defer === true) await interaction.deferReply()
+            command.execute(interaction, client).catch(err => {
+                console.log(err);
+                client.channels.cache.get("941037761891270666").send({ embeds: [new Discord.MessageEmbed().setTitle("🚫 An Error Occurred!").addField(`Caused by:`, `${interaction.member.user.tag}`).addField(`From the command:`, `${interaction.commandName}`).addField("Error:", `${err}`).setColor(config.colors.error)] });
+            });
         }
+    }
+});
+
+process.on("unhandledRejection", async error => {
+    if(error instanceof Discord.DiscordAPIError) client.channels.cache.get("941037761891270666").send({ embeds: [new Discord.MessageEmbed().setTitle("New Discord API Error").setDescription(`${error.message}`).addField("Status", `${error.httpStatus}`).addField("Request", `${error.method.toUpperCase()} ${error.path}`).addField("Data", `${JSON.stringify(error.requestData.json)}`).addField("Stack", `${error.stack}`).setColor(config.colors.error)]});
+    else console.error(error)
+});
+
+client.on("messageCreate", async(message) => {
+    if(message.channel.type === 'DM'){
+        if(message.author.id === client.user.id) return;
+
+        const DMEmbed = new Discord.MessageEmbed().setAuthor({ name: message.author.tag, iconURL: message.author.displayAvatarURL({ dynamic: true })}).setColor(config.colors.command).setDescription(`${message}`).setFooter({ text: `ID: ${message.author.id}`});
+        if(message.attachments.size > 0) DMEmbed.setImage(message.attachments.first().url.toString());
+        client.channels.cache.get("907641751588704357").send({ embeds: [DMEmbed] });
     }
 });
 
