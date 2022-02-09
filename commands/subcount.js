@@ -20,6 +20,6 @@ module.exports = {
             .setDescription(`TheTerrain's current subscriber count is ${subs / 1000}K`)
             .setColor("#f1c40f")
 
-        interaction.reply({ embeds: subEmbed });
+        interaction.reply({ embeds: [subEmbed] });
     }
 }
