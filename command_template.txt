@@ -10,6 +10,7 @@ module.exports = {
             .setName('')
             .setDescription(''),
     execute(interaction, client) {
+        await interaction.deferReply();
 
 	}
 }

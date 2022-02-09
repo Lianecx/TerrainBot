@@ -15,7 +15,8 @@ async function getSubcount(youtubeId) {
     if(!resp) return;
 
     const data = await resp.json();
-    return data['items'][0].statistics.subscriberCount;
+    if(!data.items) return console.log(`Invalid response value from the youtube api`);
+    return data.items[0].statistics.subscriberCount;
 }
 
 module.exports = { updateSubcount, getSubcount };

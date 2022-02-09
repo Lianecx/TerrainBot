@@ -33,7 +33,11 @@ client.once('ready', async () => {
 });
 
 client.on('interactionCreate', async interaction => {
-    if(interaction.isAutocomplete) {
+    interaction.reply = function (content) {
+        return interaction.editReply(content);
+    }
+
+    if(interaction.isAutocomplete()) {
         if (interaction.commandName === 'help') {
             //Help Command
             await help.autocomplete(interaction, client);
