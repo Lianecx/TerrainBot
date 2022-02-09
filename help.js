@@ -38,7 +38,7 @@ module.exports = {
                 .setAuthor({ name: client.user.username, iconURL: client.user.displayAvatarURL({ format: 'png', dynamic: false }) })
                 .setColor('DARK_BUT_NOT_BLACK');
 
-            client.commands.forEach(command => helpEmbed.addField(command.name.toUpperCase(), command.description, true));
+            client.commands.forEach(command => helpEmbed.addField(command.name.cap(), command.description, true));
 
             interaction.reply({ embeds: [helpEmbed], allowedMentions: { repliedUser: false } });
         } else {
@@ -54,9 +54,9 @@ module.exports = {
                 .setTitle('Help Menu')
                 .setAuthor({ name: client.user.username, iconURL: client.user.displayAvatarURL({ format: 'png', dynamic: false }) })
                 .setColor('DARK_BUT_NOT_BLACK')
-                .addField(helpCommand.name.toUpperCase(), helpCommand.description);
-            if(helpCommand.usage) helpEmbed.addField('\n**USAGE**', helpCommand.usage);
-            if(helpCommand.example) helpEmbed.addField('\n**EXAMPLE**', helpCommand.example);
+                .addField(helpCommand.name.cap(), helpCommand.description);
+            if(helpCommand.usage) helpEmbed.addField('Usage', helpCommand.usage);
+            if(helpCommand.example) helpEmbed.addField('\nExample', helpCommand.example);
 
             interaction.reply({ embeds: [helpEmbed], allowedMentions: { repliedUser: false } });
         }

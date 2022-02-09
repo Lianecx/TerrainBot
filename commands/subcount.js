@@ -5,8 +5,6 @@ const config = require('../config.json');
 
 module.exports = {
     name: 'subcount',
-    usage: 'subcount',
-    example: 'subcount',
     description: 'Gets TheTerrain\'s current youtube subcount!',
     data: new SlashCommandBuilder()
             .setName('subcount')
