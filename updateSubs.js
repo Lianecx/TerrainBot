@@ -11,4 +11,11 @@ async function updateSubs(channel, youtubeId) {
     console.log(`Updated sub count: ${subs / 1000}K`);
 }
 
-module.exports = { updateSubs };
+async function subCount(youtubeId) {
+    const resp = await fetch(`https://www.googleapis.com/youtube/v3/channels?part=statistics&id=${youtubeId}&key=${apikey}`);
+    const data = await resp.json();
+
+    return `${data['items'][0].statistics.subscriberCount / 1000}K`;
+}
+
+module.exports = { updateSubs, subCount };
