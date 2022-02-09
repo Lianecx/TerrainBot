@@ -13,27 +13,10 @@
 const { token, clientId, guildId, roleIds } = require('./config.json');
 const { REST } = require('@discordjs/rest');
 const { Routes } = require('discord-api-types/v9');
-const { SlashCommandBuilder } = require('@discordjs/builders');
+const help = require('./help');
 const fs = require('fs');
 
 const commandFiles = fs.readdirSync('./commands/').filter(file => file.endsWith('.js'));
-
-//Help SlashCommandBuilder
-const helpData = new SlashCommandBuilder()
-    .setName('help')
-    .setDescription('Detailed Description of every command.')
-    .addStringOption(option =>
-        option.setName('command')
-        .setDescription('Set the command of which you want to get information.')
-        .setRequired(false)
-    );
-
-//Still Help SlashCommandBuilder
-helpData.options[0].choices = [];
-for (const file of commandFiles) {
-    const command = require(`./commands/${file}`);
-    helpData.options[0].choices.push({ name: command.name, value: command.name });
-}
 
 //Push all SlashBuilders (in JSON) and permissions from all command files to array
 const commands = [];
@@ -41,6 +24,7 @@ const permissions = [];
 for (const file of commandFiles) {
     const command = require(`./commands/${file}`);
     commands.push(command.data.toJSON());
+
 	if(command.permissions) {
         let perms = [];
         for(const perm of command.permissions) {
@@ -52,7 +36,7 @@ for (const file of commandFiles) {
 }
 
 //Push help SlashBuilder (in JSON) to array
-commands.push(helpData.toJSON());
+commands.push(help.data.toJSON());
 
 const rest = new REST({ version: '9' }).setToken(token);
 

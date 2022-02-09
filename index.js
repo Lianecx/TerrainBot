@@ -2,7 +2,7 @@ const Discord = require('discord.js');
 const cron = require('node-cron');
 const fs = require('fs');
 const config = require('./config.json');
-const { updateSubcount } = require('./updateSubs');
+const youtube = require('./youtube');
 const help = require('./help');
 
 const client = new Discord.Client({ intents: ['GUILDS', 'GUILD_MESSAGES'] });
@@ -20,22 +20,35 @@ client.once('ready', async () => {
     client.user.setActivity('over TheTerrain', { type: 'WATCHING' });
 
     const subcountChannel = client.channels.cache.get(config.channels.subcount);
-    updateSubcount(subcountChannel, config.youtubeId);
-    cron.schedule('0 */12 * * *', () => updateSubcount(subcountChannel, config.youtubeId)); //Update subs every 12 hours
+    await youtube.updateSubcount(subcountChannel, config.youtubeId);
+    cron.schedule('0 */12 * * *', async () => await youtube.updateSubcount(subcountChannel, config.youtubeId)); //Update subs every 12 hours
 });
 
 client.on('interactionCreate', async interaction => {
-    if (!interaction.isCommand()) return;
+    if(interaction.isAutocomplete) {
+        if (interaction.commandName === 'help') {
+            //Help Command
+            await help.autocomplete(interaction, client);
+        } else {
+            //Other Commands
+            const command = client.commands.get(interaction.commandName);
+            if (!command) return;
 
-    if (interaction.commandName === 'help') {
-        //Help Command
-        await help.execute(interaction, client);
-    } else {
-        //Other Commands
-        const command = client.commands.get(interaction.commandName);
-        if (!command) return;
+            command.autocomplete(interaction, client);
+        }
+    }
 
-        command.execute(interaction, client);
+    if(interaction.isCommand()) {
+        if (interaction.commandName === 'help') {
+            //Help Command
+            await help.execute(interaction, client);
+        } else {
+            //Other Commands
+            const command = client.commands.get(interaction.commandName);
+            if (!command) return;
+
+            command.execute(interaction, client);
+        }
     }
 });
 
