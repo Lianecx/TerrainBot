@@ -1,38 +1,18 @@
 const Discord = require('discord.js');
-const Bree = require('bree');
-const { token } = require('./config.json');
-const { updateSubs } = require("./jobs/update_subs");
-
+const cron = require('node-cron');
+const { token, channels } = require('./config.json');
+const { updateSubs } = require('./updateSubs');
 const client = new Discord.Client({ intents: ['GUILDS'] });
 
-const youtubeId = 'UCLlVS9RRl8nC2Yirs1YbrOg'; //TheTerrains youtube Id
-
-const bree = new Bree({
-    worker: {
-        workerData: {
-            client: client,
-            youtubeId: youtubeId,
-        },
-    },
-    jobs: [
-        {
-            name: 'update_subs',
-            timeout: "1 seconds",
-            interval: '1 day',
-        },
-    ],
-});
+const youtubeId = 'UCLlVS9RRl8nC2Yirs1YbrOg'; //TheTerrains Youtube Id
 
 client.once('ready', async () => {
     console.log(`Bot logged in as ${client.user.tag}.`);
     client.user.setActivity('over TheTerrain', { type: 'WATCHING' });
 
-    bree.start();
+    const subcountChannel = client.channels.cache.get(channels.subcount);
+    updateSubs(subcountChannel, youtubeId);
+    cron.schedule('0 */12 * * *', () => updateSubs(subcountChannel, youtubeId)); //Update subs every 12 hours
 });
 
 client.login(token);
-
-function getClient() {
-    return client;
-}
-module.exports = { getClient };
