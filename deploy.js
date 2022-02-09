@@ -10,7 +10,7 @@
 //    },
 //}
 //Must be in same folder as main.js
-const { token, clientId, guildId, roleIds } = require('./config.json');
+const config = require('./config.json');
 const { REST } = require('@discordjs/rest');
 const { Routes } = require('discord-api-types/v9');
 const help = require('./help');
@@ -24,11 +24,12 @@ const permissions = [];
 for (const file of commandFiles) {
     const command = require(`./commands/${file}`);
     commands.push(command.data.toJSON());
+    console.log(`Loaded ${command.name}`);
 
 	if(command.permissions) {
         let perms = [];
         for(const perm of command.permissions) {
-            if(roleIds[perm]) perms.push({ id: roleIds[perm], type: 1, permission: true });
+            if((config.roleIds)[perm]) perms.push({ id: (config.roleIds)[perm], type: 1, permission: true });
             else if(!isNaN(perm)) perms.push({ id: perm, type: 1, permission: true });
         }
         permissions.push({ name: command.name, perms: perms });
@@ -38,7 +39,7 @@ for (const file of commandFiles) {
 //Push help SlashBuilder (in JSON) to array
 commands.push(help.data.toJSON());
 
-const rest = new REST({ version: '9' }).setToken(token);
+const rest = new REST({ version: '9' }).setToken(config.token);
 
 (async () => {
     try {
@@ -46,15 +47,9 @@ const rest = new REST({ version: '9' }).setToken(token);
 
         //Upload all SlashCommands to discord (only for one guild)
         const response = await rest.put(
-            Routes.applicationGuildCommands(clientId, guildId),
+            Routes.applicationGuildCommands(config.clientId, config.guildId),
             { body: commands },
         );
-
-        //For GLOBAL Slash commands:
-        //await rest.put(
-        //    Routes.applicationCommands(clientId),
-        //    { body: commands },
-        //);
 
 		//Slash Command Permissions
 		const fullPermissions = [];
@@ -64,11 +59,10 @@ const rest = new REST({ version: '9' }).setToken(token);
 				permissions: permissions.find(cmd => cmd.name === permission.name).perms,
 			});
 		}
-        console.log(fullPermissions)
 
         //Upload permissions to discord
         await rest.put(
-            Routes.guildApplicationCommandsPermissions(clientId, guildId),
+            Routes.guildApplicationCommandsPermissions(config.clientId, config.guildId),
             { body: fullPermissions },
         );
 

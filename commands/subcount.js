@@ -8,8 +8,8 @@ module.exports = {
     example: 'subcount',
     description: 'Gets TheTerrain\'s current youtube subcount!',
     data: new SlashCommandBuilder()
-            .setName('ping')
-            .setDescription('Ping! Pong!'),
+            .setName('subcount')
+            .setDescription('Gets TheTerrain\'s current youtube subcount!'),
     async execute(interaction, client) {
         console.log(`${interaction.member.user.tag} executed /subcount`);
 
