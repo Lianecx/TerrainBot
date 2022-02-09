@@ -20,7 +20,7 @@ module.exports = {
 
         for (const file of commandFiles) {
             const command = require(`./commands/${file}`);
-            commandArray.push({ name: command.name.title(), value: command.name.title() });
+            commandArray.push({ name: command.name.cap(), value: command.name.cap() });
         }
 
         interaction.respond(commandArray);

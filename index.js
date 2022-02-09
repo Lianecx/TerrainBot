@@ -7,6 +7,14 @@ const help = require('./help');
 
 const client = new Discord.Client({ intents: ['GUILDS', 'GUILD_MESSAGES'] });
 
+/*
+ * Converts the first letter of a string to uppercase.
+ * @returns {String} The formatted string.
+ */
+String.prototype.cap = function() {
+    return this[0].toUpperCase() + this.slice(1, this.length).toLowerCase()
+};
+
 //Set all commandFiles in ./commands in client.commands collection
 client.commands = new Discord.Collection();
 const commandFiles = fs.readdirSync('./commands/').filter(file => file.endsWith('.js'));
