@@ -20,13 +20,13 @@ module.exports = {
 
         for (const file of commandFiles) {
             const command = require(`./commands/${file}`);
-            commandArray.push({ name: command.name.cap(), value: command.name.cap() });
+            commandArray.push({ name: command.name.cap(), value: command.name });
         }
 
         interaction.respond(commandArray);
     },
     async execute(interaction, client) {
-        const command = message.options.getString('command');
+        const command = interaction.options.getString('command');
 
         await interaction.deferReply();
 
@@ -35,7 +35,7 @@ module.exports = {
 
             const helpEmbed = new Discord.MessageEmbed()
                 .setTitle('Help Menu')
-                .setAuthor(client.user.username, client.user.displayAvatarURL({ format: 'png', dynamic: false }))
+                .setAuthor({ name: client.user.username, iconURL: client.user.displayAvatarURL({ format: 'png', dynamic: false }) })
                 .setColor('DARK_BUT_NOT_BLACK');
 
             client.commands.forEach(command => helpEmbed.addField(command.name.toUpperCase(), command.description, true));
@@ -52,7 +52,7 @@ module.exports = {
 
             const helpEmbed = new Discord.MessageEmbed()
                 .setTitle('Help Menu')
-                .setAuthor(client.user.username, client.user.displayAvatarURL({ format: 'png', dynamic: false }))
+                .setAuthor({ name: client.user.username, iconURL: client.user.displayAvatarURL({ format: 'png', dynamic: false }) })
                 .setColor('DARK_BUT_NOT_BLACK')
                 .addField(helpCommand.name.toUpperCase(), helpCommand.description);
             if(helpCommand.usage) helpEmbed.addField('\n**USAGE**', helpCommand.usage);
