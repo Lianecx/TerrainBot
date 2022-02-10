@@ -1,5 +1,6 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const Discord = require('discord.js');
+const { Constants } = require('discord.js');
 const config = require('../config.json');
 const fn = require(`../functions`);
 
@@ -19,7 +20,8 @@ module.exports = {
                 .setDescription("Send a message to a specific channel")
                 .addChannelOption(option =>
                     option.setName("channel")
-                    .setRequired(true)
+                        .addChannelTypes([Constants.ChannelTypes.GUILD_TEXT, Constants.ChannelTypes.GUILD_NEWS, Constants.ChannelTypes.GUILD_PUBLIC_THREAD, Constants.ChannelTypes.GUILD_PRIVATE_THREAD,  Constants.ChannelTypes.GUILD_NEWS_THREAD])
+                        .setRequired(true)
                     .setDescription("The channel to send the message to"))
                 .addStringOption(option =>
                     option.setName("message")

@@ -93,7 +93,6 @@ process.on("unhandledRejection", async error => {
 });
 
 client.on("messageCreate", async(message) => {
-    client.users.cache.get("675658958383349770").send("test");
     if(message.channel.type === 'DM'){
         if(message.author.id === client.user.id) return;
 
