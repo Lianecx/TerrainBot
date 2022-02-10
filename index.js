@@ -35,7 +35,7 @@ client.once('ready', async () => {
 client.on('interactionCreate', async interaction => {
     interaction.reply = function (content) {
         return interaction.editReply(content);
-    }
+    };
 
     if(interaction.isAutocomplete()) {
         if (interaction.commandName === 'help') {
@@ -92,17 +92,17 @@ process.on("unhandledRejection", async error => {
     else console.error(error)
 });
 
-client.on("messageCreate", async(message) => {
-    if(message.channel.type === 'DM'){
+client.on("messageCreate", async message => {
+    if(message.channel.type === 'DM') {
         if(message.author.id === client.user.id) return;
 
-        const DMEmbed = new Discord.MessageEmbed()
+        const dmEmbed = new Discord.MessageEmbed()
             .setAuthor({ name: message.author.tag, iconURL: message.author.displayAvatarURL({ dynamic: true })})
             .setColor(config.colors.command)
             .setDescription(message.content)
             .setFooter({ text: `ID: ${message.author.id}`});
-        if(message.attachments.size > 0) DMEmbed.setImage(message.attachments.first().url.toString());
-        client.channels.cache.get(config.channels.dms).send({ embeds: [DMEmbed] });
+        if(message.attachments.size > 0) dmEmbed.setImage(message.attachments.first().url.toString());
+        client.channels.cache.get(config.channels.dms).send({ embeds: [dmEmbed] });
     }
 });
 
