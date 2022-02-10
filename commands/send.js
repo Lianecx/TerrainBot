@@ -44,11 +44,13 @@ module.exports = {
         const channel = interaction.options.getChannel("channel");
         const msg = interaction.options.getString("message");
 
+        console.log(`${interaction.member.user.tag} executed /send ${interaction.options.getSubcommand()}`);
+
         if(interaction.options.getSubcommand() === "channel") {
             try {
                 await channel.send(msg);
             } catch(err) {
-                return interaction.reply({ embeds: [fn.sendError("Could not reach channel, the id might've been invalid or I do not have access to that channel")] });
+                return interaction.reply({ embeds: [fn.sendError("Could not reach channel, I might not have access to that channel")] });
             }
 
             const successEmbed = new Discord.MessageEmbed()
