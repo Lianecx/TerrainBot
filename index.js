@@ -59,17 +59,36 @@ client.on('interactionCreate', async interaction => {
             const command = client.commands.get(interaction.commandName);
             if (!command) return;
 
-            if(command.options?.defer === true) await interaction.deferReply()
-            command.execute(interaction, client).catch(err => {
-                console.log(err);
-                client.channels.cache.get("941037761891270666").send({ embeds: [new Discord.MessageEmbed().setTitle("🚫 An Error Occurred!").addField(`Caused by:`, `${interaction.member.user.tag}`).addField(`From the command:`, `${interaction.commandName}`).addField("Error:", `${err}`).setColor(config.colors.error)] });
-            });
+            if(command.options?.defer) await interaction.deferReply();
+
+            try {
+                await command.execute(interaction, client);
+            } catch(err) {
+                const commandErrEmbed = new Discord.MessageEmbed()
+                    .setTitle("🚫 An Error Occurred!")
+                    .addField(`Caused by:`, `${interaction.member.user.tag}`)
+                    .addField(`From the command:`, `${interaction.commandName}`)
+                    .addField("Error:", `${err}`)
+                    .setColor(config.colors.error);
+
+                console.log(`Command ${command.name} threw an error`, err);
+                client.channels.cache.get("941037761891270666").send({ embeds: [commandErrEmbed] });
+            }
         }
     }
 });
 
 process.on("unhandledRejection", async error => {
-    if(error instanceof Discord.DiscordAPIError) client.channels.cache.get("941037761891270666").send({ embeds: [new Discord.MessageEmbed().setTitle("New Discord API Error").setDescription(`${error.message}`).addField("Status", `${error.httpStatus}`).addField("Request", `${error.method.toUpperCase()} ${error.path}`).addField("Data", `${JSON.stringify(error.requestData.json)}`).addField("Stack", `${error.stack}`).setColor(config.colors.error)]});
+    const apiErrEmbed = new Discord.MessageEmbed()
+        .setTitle("New Discord API Error")
+        .setDescription(`${error.message}`)
+        .addField("Status", `${error.httpStatus}`)
+        .addField("Request", `${error.method.toUpperCase()} ${error.path}`)
+        .addField("Data", `${JSON.stringify(error.requestData.json)}`)
+        .addField("Stack", `${error.stack}`)
+        .setColor(config.colors.error);
+
+    if(error instanceof Discord.DiscordAPIError) client.channels.cache.get("941037761891270666").send({ embeds: [apiErrEmbed]});
     else console.error(error)
 });
 
