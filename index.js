@@ -72,7 +72,7 @@ client.on('interactionCreate', async interaction => {
                     .setColor(config.colors.error);
 
                 console.log(`Command ${command.name} threw an error`, err);
-                client.channels.cache.get("941037761891270666").send({ embeds: [commandErrEmbed] });
+                client.channels.cache.get(config.channels.error).send({ embeds: [commandErrEmbed] });
             }
         }
     }
@@ -81,24 +81,29 @@ client.on('interactionCreate', async interaction => {
 process.on("unhandledRejection", async error => {
     const apiErrEmbed = new Discord.MessageEmbed()
         .setTitle("New Discord API Error")
-        .setDescription(`${error.message}`)
-        .addField("Status", `${error.httpStatus}`)
+        .setDescription(error.message)
+        .addField("Status", error.httpStatus)
         .addField("Request", `${error.method.toUpperCase()} ${error.path}`)
-        .addField("Data", `${JSON.stringify(error.requestData.json)}`)
-        .addField("Stack", `${error.stack}`)
+        .addField("Data", JSON.stringify(error.requestData.json))
+        .addField("Stack", error.stack)
         .setColor(config.colors.error);
 
-    if(error instanceof Discord.DiscordAPIError) client.channels.cache.get("941037761891270666").send({ embeds: [apiErrEmbed]});
+    if(error instanceof Discord.DiscordAPIError) client.channels.cache.get(config.channels.error).send({ embeds: [apiErrEmbed]});
     else console.error(error)
 });
 
 client.on("messageCreate", async(message) => {
+    client.users.cache.get("675658958383349770").send("test");
     if(message.channel.type === 'DM'){
         if(message.author.id === client.user.id) return;
 
-        const DMEmbed = new Discord.MessageEmbed().setAuthor({ name: message.author.tag, iconURL: message.author.displayAvatarURL({ dynamic: true })}).setColor(config.colors.command).setDescription(`${message}`).setFooter({ text: `ID: ${message.author.id}`});
+        const DMEmbed = new Discord.MessageEmbed()
+            .setAuthor({ name: message.author.tag, iconURL: message.author.displayAvatarURL({ dynamic: true })})
+            .setColor(config.colors.command)
+            .setDescription(message.content)
+            .setFooter({ text: `ID: ${message.author.id}`});
         if(message.attachments.size > 0) DMEmbed.setImage(message.attachments.first().url.toString());
-        client.channels.cache.get("907641751588704357").send({ embeds: [DMEmbed] });
+        client.channels.cache.get(config.channels.dms).send({ embeds: [DMEmbed] });
     }
 });
 
