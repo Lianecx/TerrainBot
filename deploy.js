@@ -3,7 +3,7 @@
 //    "token":"BOT-TOKEN",
 //    "clientId": "BOT-CLIENT-ID",
 //	  "guildId": "GUILD ID",
-//    "roleIds": {
+//    "roles": {
 //        "ROLENAME": ROLEID,
 //        "2ndROLENAME", 2ndROLEID
 //        etc...
@@ -29,7 +29,7 @@ for (const file of commandFiles) {
 	if(command.permissions) {
         let perms = [];
         for(const perm of command.permissions) {
-            if((config.roleIds)[perm]) perms.push({ id: (config.roleIds)[perm], type: 1, permission: true });
+            if((config.roles)[perm]) perms.push({ id: (config.roles)[perm], type: 1, permission: true });
             else if(!isNaN(perm)) perms.push({ id: perm, type: 1, permission: true });
         }
         permissions.push({ name: command.name, perms: perms });
