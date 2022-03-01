@@ -1,15 +1,3 @@
-//config.json format: 
-//{
-//    "token":"BOT-TOKEN",
-//    "clientId": "BOT-CLIENT-ID",
-//	  "guildId": "GUILD ID",
-//    "roles": {
-//        "ROLENAME": ROLEID,
-//        "2ndROLENAME", 2ndROLEID
-//        etc...
-//    },
-//}
-//Must be in same folder as main.js
 const config = require('./config.json');
 const { REST } = require('@discordjs/rest');
 const { Routes } = require('discord-api-types/v9');
