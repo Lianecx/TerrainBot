@@ -1,4 +1,5 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
+const Discord = require('discord.js');
 const fire = require('../fire');
 
 module.exports = {
@@ -33,10 +34,16 @@ module.exports = {
         const channel = interaction.options.getChannel('channel');
 
         if(subcommand === 'start') {
-            interaction.editReply(`🔥 Starting fire in <#${channel.id}>...`);
+            const fireEmbed = new Discord.MessageEmbed()
+                .setTitle('Fire Incident')
+                .setDescription(`🔥 Starting fire in <#${channel.id}>`);
+            interaction.editReply({ embeds: [fireEmbed] });
             fire.startFire(channel);
         } else if(subcommand === 'end') {
-            interaction.editReply(`🔥 Ending fire in <#${channel.id}>...`);
+            const fireEmbed = new Discord.MessageEmbed()
+                .setTitle('Fire Incident')
+                .setDescription(`🔥 Ending fire in <#${channel.id}>`);
+            interaction.editReply({ embeds: [fireEmbed] });
             fire.endFire(channel);
         }
     }
