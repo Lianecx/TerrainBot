@@ -18,7 +18,7 @@ function endFire(channel) {
     channel.setRateLimitPerUser(0, 'End Fire');
 
     const index = channelsOnFire.findIndex(c => c.name === channel.name);
-    if(!index) return console.log(`${channel.name} is not on fire`);
+    if(index === -1) return console.log(`${channel.name} is not on fire`);
 
     channelsOnFire.splice(index, 1);
     console.log(`Ended fire in ${channel.name}`);
