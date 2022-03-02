@@ -36,7 +36,7 @@ module.exports = {
             interaction.editReply(`🔥 Starting fire in <#${channel.id}>...`);
             fire.startFire(channel);
         } else if(subcommand === 'end') {
-            interaction.editReply(`🔥 Ending fire in <$${channel.id}>...`);
+            interaction.editReply(`🔥 Ending fire in <#${channel.id}>...`);
             fire.endFire(channel);
         }
     }
