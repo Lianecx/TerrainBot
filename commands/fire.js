@@ -28,6 +28,9 @@ module.exports = {
                         .setDescription('Set the channel')
                         .setRequired(true)
                 )
+        ).addSubcommand(subcommand =>
+            subcommand.setName('endall')
+                .setDescription('End all fires in the server')
         ),
     execute(interaction, client) {
         const subcommand = interaction.options.getSubcommand();
@@ -45,6 +48,13 @@ module.exports = {
                 .setDescription(`🔥 Ending fire in <#${channel.id}>`);
             interaction.editReply({ embeds: [fireEmbed] });
             fire.endFire(channel);
+        } else if(subcommand === 'endall') {
+            const fireEmbed = new Discord.MessageEmbed()
+                .setTitle('Fire Incident')
+                .setDescription(`🔥 Ending all fires in this server`);
+            interaction.editReply({ embeds: [fireEmbed] });
+
+            fire.endAllFires();
         }
     }
 };
