@@ -49,26 +49,25 @@ module.exports = {
         if(interaction.options.getSubcommand() === "channel") {
             try {
                 await channel.send(msg);
-            } catch(err) {
+            } catch(ignored) {
                 return interaction.reply({ embeds: [fn.sendError("Could not reach channel, I might not have access to that channel")] });
             }
 
             const successEmbed = new Discord.MessageEmbed()
                 .setAuthor({ name: "Success!", iconURL: "https://cdn.discordapp.com/emojis/914130307362484265.webp?size=96&quality=lossless"})
-                .setDescription(`Successfully sent \`${msg}\` to ${channel.name}`)
+                .setDescription(`Successfully sent \`${msg}\` to <#${channel.id}>`)
                 .setColor(config.colors.success);
             return interaction.reply({ embeds: [successEmbed] });
         } else if(interaction.options.getSubcommand() === "user") {
             try {
-                user.send(`${msg}`);
-            } catch(err){
+                await user.send(`${msg}`);
+            } catch(ignored){
                 return interaction.reply({ embeds: [fn.sendError("Could not reach user, the id might've been invalid or their dm's are not enbaled")] });
             }
 
             const successEmbed = new Discord.MessageEmbed()
                 .setAuthor({ name: client.user.tag, iconURL: client.user.displayAvatarURL({ dynamic: true, format: 'png', size: 1024 }) })
-                .setDescription(msg)
-                .setFooter({ text: `Successfully sent \`${msg}\` to ${user.name}` })
+                .setDescription(`Successfully sent \`${msg}\` to <@${user.id}>`)
                 .setColor(config.colors.success);
             return interaction.reply({ embeds: [successEmbed], ephemeral: false });
         }
