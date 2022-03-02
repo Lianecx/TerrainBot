@@ -1,3 +1,5 @@
+const Discord = require('discord.js');
+
 const channelsOnFire = new Map();
 const expansionIntervals = new Map();
 
@@ -6,33 +8,39 @@ const maxLevel = 5;
 
 function startFire(channel) {
     channel.setName(`🔥${channel.name}🔥`, 'Start Fire');
-    channel.setRateLimitPerUser(3, 'Start Fire'); //Slowmode
+    channel?.setRateLimitPerUser(3, 'Start Fire'); //Slowmode
 
     channelsOnFire.set(channel.id, channel);
     console.log(`Started fire in ${channel.name}`);
-    startExpanding(channel);
+    //startExpanding(channel);
 }
 
 function endFire(channel) {
     channel.setName(channel.name.replaceAll('🔥', ''), 'End Fire');
-    channel.setRateLimitPerUser(0, 'End Fire');
+    channel?.setRateLimitPerUser(0, 'End Fire');
 
     if(!channelsOnFire.get(channel.id)) return console.log(`${channel.name} is not on fire`);
 
     channelsOnFire.delete(channel.id);
     console.log(`Ended fire in ${channel.name}`);
-    endExpanding(channel);
+    //endExpanding(channel);
 }
 
 function startExpanding(channel) {
+    if(!channel instanceof Discord.TextChannel) {
+        const randChannel = findNewChannel(channel.rawPosition);
+        startFire(randChannel);
+        console.log(`Skipping expansion in ${channel.name}`);
+        return;
+    }
+
     channel.setTopic('Fire Level: ' + '-'.repeat(maxLevel-1) + `\n${channel.topic}`, 'Fire Expansion');
 
     let currentLevel = 0;
     const interval = setInterval(() => {
         if(currentLevel >= maxLevel) { //Reached max level
             //TODO Channel either above or below
-            const randPosition = Math.random() * (channel.position+1 - channel.position-1) + channel.position-1;
-            const randChannel = channel.guild.channels.cache.find(c => c.position === randPosition);
+            const randChannel = findNewChannel(channel.rawPosition);
             startFire(randChannel);
 
             console.log(`Reached max level in ${channel.name}. Expanding to ${randChannel.name}`);
@@ -44,6 +52,11 @@ function startExpanding(channel) {
         console.log(`Expanded in ${channel.name} to level ${currentLevel}`);
     }, msPerLevel);
     expansionIntervals.set(channel.id, interval);
+
+    function findNewChannel(position) {
+        const randPosition = Math.random() * (position+1 - position-1) + position-1;
+        return channel.guild.channels.cache.find(c => c.position === randPosition);
+    }
 
     console.log(`Started expansion in ${channel.name}`);
     return interval;
