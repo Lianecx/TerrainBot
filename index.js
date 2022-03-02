@@ -4,6 +4,7 @@ const fs = require('fs');
 const config = require('./config.json');
 const youtube = require('./youtube');
 const help = require('./help');
+const fire = require('./fire');
 
 const client = new Discord.Client({ intents: ['GUILDS', 'GUILD_MESSAGES'] });
 
@@ -79,6 +80,8 @@ client.on('interactionCreate', async interaction => {
 });
 
 process.on("unhandledRejection", async error => {
+    if(!error instanceof Discord.DiscordAPIError) return console.error(error);
+
     const apiErrEmbed = new Discord.MessageEmbed()
         .setTitle("New Discord API Error")
         .setDescription(error.message)
@@ -88,11 +91,18 @@ process.on("unhandledRejection", async error => {
         .addField("Stack", error.stack)
         .setColor(config.colors.error);
 
-    if(error instanceof Discord.DiscordAPIError) client.channels.cache.get(config.channels.error).send({ embeds: [apiErrEmbed]});
-    else console.error(error)
+    client.channels.cache.get(config.channels.error).send({ embeds: [apiErrEmbed]});
 });
 
 client.on("messageCreate", async message => {
+    //Fire Event
+    if(message.content.startsWith('$startfire')) {
+        fire.startFire(message.mentions?.channels.first());
+
+    } else if(message.content.startsWith('$endfire')) {
+        fire.endFire(message.mentions?.channels.first());
+    }
+
     if(message.channel.type === 'DM') {
         if(message.author.id === client.user.id) return;
 
