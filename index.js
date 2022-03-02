@@ -4,8 +4,6 @@ const fs = require('fs');
 const config = require('./config.json');
 const youtube = require('./youtube');
 const help = require('./help');
-const fire = require('./fire');
-
 const client = new Discord.Client({ intents: ['GUILDS', 'GUILD_MESSAGES'] });
 
 /*
@@ -95,15 +93,6 @@ process.on("unhandledRejection", async error => {
 });
 
 client.on("messageCreate", async message => {
-    //Fire Event
-    if(message.content.startsWith('$startfire')) {
-        fire.startFire(message.mentions?.channels.first());
-
-    } else if(message.content.startsWith('$endfire')) {
-        fire.endFire(message.mentions?.channels.first());
-
-    }
-
     if(message.channel.type === 'DM') {
         if(message.author.id === client.user.id) return;
 
