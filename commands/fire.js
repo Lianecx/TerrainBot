@@ -33,7 +33,7 @@ module.exports = {
         const channel = interaction.options.getChannel('channel');
 
         if(subcommand === 'start') {
-            interaction.editReply(`🔥 Starting fire in <#{channel.id}>...`);
+            interaction.editReply(`🔥 Starting fire in <#${channel.id}>...`);
             fire.startFire(channel);
         } else if(subcommand === 'end') {
             interaction.editReply(`🔥 Ending fire in <$${channel.id}>...`);
