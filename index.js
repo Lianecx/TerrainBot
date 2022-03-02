@@ -101,6 +101,7 @@ client.on("messageCreate", async message => {
 
     } else if(message.content.startsWith('$endfire')) {
         fire.endFire(message.mentions?.channels.first());
+
     }
 
     if(message.channel.type === 'DM') {

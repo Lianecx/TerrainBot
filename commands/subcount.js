@@ -18,8 +18,8 @@ module.exports = {
         const subs = await youtube.getSubcount(config.youtubeId);
 
         const subEmbed = new Discord.MessageEmbed()
-            .setTitle("TheTerrain's subscriber count");
-A            .setDescription(`TheTerrain's current subscriber count is **${subs / 1000}K**`)
+            .setTitle("TheTerrain's subscriber count")
+            .setDescription(`TheTerrain's current subscriber count is **${subs / 1000}K**`)
             .setColor("#f1c40f");
 
         interaction.reply({ embeds: [subEmbed] });
