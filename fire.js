@@ -1,4 +1,4 @@
-const channelsOnFire = [];
+const channelsOnFire = new Map();
 const expansionIntervals = new Map();
 
 const msPerLevel = 60000;
@@ -8,7 +8,7 @@ function startFire(channel) {
     channel.setName(`🔥${channel.name}🔥`, 'Start Fire');
     channel.setRateLimitPerUser(3, 'Start Fire'); //Slowmode
 
-    channelsOnFire.push(channel);
+    channelsOnFire.set(channel.id, channel);
     console.log(`Started fire in ${channel.name}`);
     startExpanding(channel);
 }
@@ -17,10 +17,9 @@ function endFire(channel) {
     channel.setName(channel.name.replaceAll('🔥', ''), 'End Fire');
     channel.setRateLimitPerUser(0, 'End Fire');
 
-    const index = channelsOnFire.findIndex(c => c.name === channel.name);
-    if(index === -1) return console.log(`${channel.name} is not on fire`);
+    if(!channelsOnFire.get(channel.id)) return console.log(`${channel.name} is not on fire`);
 
-    channelsOnFire.splice(index, 1);
+    channelsOnFire.delete(channel.id);
     console.log(`Ended fire in ${channel.name}`);
     endExpanding(channel);
 }
@@ -31,7 +30,7 @@ function startExpanding(channel) {
     let currentLevel = 0;
     const interval = setInterval(() => {
         if(currentLevel >= maxLevel) { //Reached max level
-            //Channel either above or below
+            //TODO Channel either above or below
             const randPosition = Math.random() * (channel.position+1 - channel.position-1) + channel.position-1;
             const randChannel = channel.guild.channels.cache.find(c => c.position === randPosition);
             startFire(randChannel);
@@ -59,4 +58,8 @@ function endExpanding(channel) {
     console.log(`Ended expansion in ${channel.name}`);
 }
 
-module.exports = { startFire, endFire };
+function endAllFires() {
+    channelsOnFire.forEach(channel => endFire(channel));
+}
+
+module.exports = { startFire, endFire, endAllFires };
