@@ -3,7 +3,7 @@ const Discord = require('discord.js');
 const channelsOnFire = new Map();
 const expansionIntervals = new Map();
 
-const msPerLevel = 10000;
+const msPerLevel = 2000;
 const maxLevel = 5;
 
 async function startFire(channel) {
@@ -27,12 +27,16 @@ async function endFire(channel) {
     await endExpanding(channel);
 }
 
+function endAllFires() {
+    channelsOnFire.forEach(channel => endFire(channel));
+}
+
 async function startExpanding(channel) {
-    if(!channel instanceof Discord.TextChannel) {
+    if(!(channel instanceof Discord.TextChannel)) {
         const randChannel = findNewChannel(channel);
-        if(randChannel) await startFire(randChannel);
         console.log(`Skipping expansion in ${channel.name}`);
-        return;
+        if(randChannel) return startFire(randChannel);
+        return console.log('Did not find new channel to expand to');
     }
 
     const thread = await channel.threads.create({
@@ -50,18 +54,21 @@ async function startExpanding(channel) {
     let currentLevel = 0;
     const interval = setInterval(async () => {
         if(currentLevel >= maxLevel) { //Reached max level
+            clearInterval(interval); //End Expansion
+
             const randChannel = findNewChannel(channel);
             if (randChannel) {
                 console.log(`Reached max level in ${channel.name}. Expanding to ${randChannel.name}`);
-                await startFire(randChannel);
+                return startFire(randChannel);
             }
 
-            return clearInterval(interval); //End expansion
+            return console.log('Could not find new channel to expand to'); //End expansion
         }
 
         fireLevelEmbed.setDescription(fireLevelEmbed.description.replace('⚪', '🔥'));
         await fireLevel.edit({ embeds: [fireLevelEmbed] });
         currentLevel++;
+
         console.log(`Expanded in ${channel.name} to level ${currentLevel}`);
     }, msPerLevel);
     expansionIntervals.set(channel.id, interval);
@@ -80,27 +87,64 @@ async function endExpanding(channel) {
 }
 
 function findNewChannel(channel) {
-    const position = channel.rawPosition;
-    let randPosition = Math.random() * (position+1 - position-1) + position-1;
-    let randChannel = channel.guild.channels.cache.find(c => c.rawPosition === randPosition);
+    const sortedChannels = sortChannels(channel.guild);
+    let index = sortedChannels.findIndex(id => id === channel.id);
 
+    //index+1 or index-1
+    let randIndex = Math.floor(Math.random() * (index+1 - index)) + index-1;
+
+    console.log(randIndex, sortedChannels[randIndex])
+
+    let randChannel = channel.guild.channels.cache.get(sortedChannels[randIndex]);
     if(!randChannel) {
         //If channel below doesnt exist, use channel above and likewise
-        randPosition = randPosition === position-1 ? randPosition = position+1 : randPosition = position-1;
-        randChannel = channel.guild.channels.cache.find(c => c.rawPosition === randPosition);
-    }
-    if(channelsOnFire.get(randChannel.id)) {
-        //If new channel is on fire, find new channel
-        return findNewChannel(randChannel);
+        randIndex = randIndex === index-1 ? index+1 : index-1;
+        randChannel = channel.guild.channels.cache.get(sortedChannels[randIndex]);
     }
 
-    if(channelsOnFire.get(randChannel.id)) return console.log('Could not find new channel to expand to.');
+    console.log(randIndex, sortedChannels[randIndex])
+    console.log(channelsOnFire.get(randChannel.id));
+
+    if(channelsOnFire.get(randChannel.id)) {
+        //If new channel is already on fire, find new channel
+        return findNewChannel(randChannel);
+    }
 
     return randChannel;
 }
 
-function endAllFires() {
-    channelsOnFire.forEach(channel => endFire(channel));
+//Sort channels in a guild by their position
+function sortChannels(guild) {
+
+    //Sorting by type (text over voice) and by position
+    const descPos = (a, b) => {
+        if (a.type === b.type) return a.position - b.position;
+        else if (a.type === 'voice') return 1;
+        else return -1;
+    };
+
+    const channels = new Discord.Collection();
+
+    //Set No category/parent
+    channels.set('__none', guild.channels.cache.filter(channel => !channel.parent && channel.type !== 'GUILD_CATEGORY').sort(descPos));
+
+    //Set Categories with their children
+    const categories = guild.channels.cache.filter(channel => channel.type === 'GUILD_CATEGORY').sort(descPos);
+    categories.forEach(category => channels.set(category.id, category.children.sort(descPos)));
+
+    const idList = [];
+    //Loop over all categories
+    for (let [categoryID, children] of channels) {
+        const category = guild.channels.cache.get(categoryID);
+
+        //Push category
+        if (category) idList.push(category.id);
+
+        //Loop over children of categories and push children
+        for (let [, child] of children) idList.push(child.id);
+    }
+
+    return idList;
 }
 
 module.exports = { startFire, endFire, endAllFires };
