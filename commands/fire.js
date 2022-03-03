@@ -1,6 +1,6 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const Discord = require('discord.js');
-const fire = require('../fire');
+const fire = require('../fire/fire');
 
 module.exports = {
     name: 'fire',
@@ -32,7 +32,7 @@ module.exports = {
             subcommand.setName('endall')
                 .setDescription('End all fires in the server')
         ),
-    execute(interaction, client) {
+    async execute(interaction, client) {
         const subcommand = interaction.options.getSubcommand();
         const channel = interaction.options.getChannel('channel');
 
@@ -42,7 +42,7 @@ module.exports = {
                 .setDescription(`🔥 Starting fire in <#${channel.id}>`);
 
             interaction.editReply({ embeds: [fireEmbed] });
-            fire.startFire(channel);
+            await fire.startFire(channel);
 
         } else if(subcommand === 'end') {
             const fireEmbed = new Discord.MessageEmbed()
@@ -50,7 +50,7 @@ module.exports = {
                 .setDescription(`🔥 Ending fire in <#${channel.id}>`);
 
             interaction.editReply({ embeds: [fireEmbed] });
-            fire.endFire(channel);
+            await fire.endFire(channel);
 
         } else if(subcommand === 'endall') {
             const fireEmbed = new Discord.MessageEmbed()
