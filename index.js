@@ -4,6 +4,7 @@ const fs = require('fs');
 const config = require('./config.json');
 const youtube = require('./youtube');
 const help = require('./help');
+const fire = require('./fire/fire');
 const client = new Discord.Client({ intents: ['GUILDS', 'GUILD_MESSAGES'] });
 
 /*
@@ -25,6 +26,8 @@ for (const file of commandFiles) {
 client.once('ready', async () => {
     console.log(`Bot logged in as ${client.user.tag}.`);
     client.user.setActivity('over TheTerrain', { type: 'WATCHING' });
+
+    await fire.loadChannels(config.guildId);
 
     const subcountChannel = client.channels.cache.get(config.channels.subcount);
     await youtube.updateSubcount(subcountChannel, config.youtubeId);
@@ -77,22 +80,9 @@ client.on('interactionCreate', async interaction => {
     }
 });
 
-process.on("unhandledRejection", async error => {
-    if(!error instanceof Discord.DiscordAPIError) return console.error(error);
+client.on('messageCreate', message => {
+    if(fire.getChannels().has(message.channel.id)) fire.addWater(message.channel);
 
-    const apiErrEmbed = new Discord.MessageEmbed()
-        .setTitle("New Discord API Error")
-        .setDescription(error.message)
-        .addField("Status", error.httpStatus)
-        .addField("Request", `${error.method.toUpperCase()} ${error.path}`)
-        .addField("Data", JSON.stringify(error.requestData.json))
-        .addField("Stack", error.stack)
-        .setColor(config.colors.error);
-
-    client.channels.cache.get(config.channels.error).send({ embeds: [apiErrEmbed]});
-});
-
-client.on("messageCreate", async message => {
     if(message.channel.type === 'DM') {
         if(message.author.id === client.user.id) return;
 
@@ -100,10 +90,25 @@ client.on("messageCreate", async message => {
             .setAuthor({ name: message.author.tag, iconURL: message.author.displayAvatarURL({ dynamic: true })})
             .setColor(config.colors.command)
             .setDescription(message.content)
-            .setFooter({ text: `ID: ${message.author.id}`});
+            .setFooter({ text: `Id: ${message.author.id}`});
         if(message.attachments.size > 0) dmEmbed.setImage(message.attachments.first().url.toString());
         client.channels.cache.get(config.channels.dms).send({ embeds: [dmEmbed] });
     }
+});
+
+process.on('unhandledRejection', async error => {
+    if(!error instanceof Discord.DiscordAPIError) return console.error(error);
+
+    const apiErrEmbed = new Discord.MessageEmbed()
+        .setTitle('New Discord API Error')
+        .setDescription(error.message)
+        .addField('Status', error.httpStatus)
+        .addField('Request', `${error.method.toUpperCase()} ${error.path}`)
+        .addField('Data', JSON.stringify(error.requestData.json))
+        .addField('Stack', error.stack)
+        .setColor(config.colors.error);
+
+    client.channels.cache.get(config.channels.error).send({ embeds: [apiErrEmbed]});
 });
 
 client.login(config.token);
