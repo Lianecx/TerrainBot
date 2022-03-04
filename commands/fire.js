@@ -31,34 +31,52 @@ module.exports = {
         ).addSubcommand(subcommand =>
             subcommand.setName('endall')
                 .setDescription('End all fires in the server')
+        ).addSubcommand(subcommand =>
+            subcommand.setName('setfirelevel')
+                .setDescription('Set the current fire level in a specific channel')
+                .addChannelOption(option =>
+                    option.setName('channel')
+                        .setDescription('Set the channel')
+                        .setRequired(true)
+                ).addNumberOption(option =>
+                    option.setName('level')
+                        .setDescription('Set the level')
+                        .setRequired(true)
+                )
         ),
     async execute(interaction, client) {
         const subcommand = interaction.options.getSubcommand();
         const channel = interaction.options.getChannel('channel');
 
+        const fireEmbed = new Discord.MessageEmbed()
+            .setTitle('Fire Incident');
+
         if(subcommand === 'start') {
-            const fireEmbed = new Discord.MessageEmbed()
-                .setTitle('Fire Incident')
-                .setDescription(`🔥 Starting fire in <#${channel.id}>`);
+            fireEmbed.setDescription(`🔥 Starting fire in <#${channel.id}>`);
 
             interaction.editReply({ embeds: [fireEmbed] });
             await fire.startFire(channel);
 
         } else if(subcommand === 'end') {
-            const fireEmbed = new Discord.MessageEmbed()
-                .setTitle('Fire Incident')
-                .setDescription(`🔥 Ending fire in <#${channel.id}>`);
+            fireEmbed.setDescription(`🔥 Ending fire in <#${channel.id}>`);
 
             interaction.editReply({ embeds: [fireEmbed] });
             await fire.endFire(channel);
 
         } else if(subcommand === 'endall') {
-            const fireEmbed = new Discord.MessageEmbed()
-                .setTitle('Fire Incident')
-                .setDescription(`🔥 Ending all fires in this server`);
+            fireEmbed.setDescription(`🔥 Ending all fires in this server`);
 
             interaction.editReply({ embeds: [fireEmbed] });
             fire.endAllFires();
+
+        } else if(subcommand === 'setfirelevel') {
+
+            const level = interaction.options.getNumber('level');
+
+            fireEmbed.setDescription(`🔥 Setting fire level in <#${channel.id}> to ${level}`);
+
+            interaction.editReply({ embeds: [fireEmbed] });
+            fire.setFireLevel(channel, level);
         }
     }
 };
