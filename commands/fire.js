@@ -51,32 +51,37 @@ module.exports = {
         const fireEmbed = new Discord.MessageEmbed()
             .setTitle('Fire Incident');
 
-        if(subcommand === 'start') {
-            fireEmbed.setDescription(`🔥 Starting fire in <#${channel.id}>`);
+        switch (subcommand) {
+            case 'start':
+                fireEmbed.setDescription(`🔥 Starting fire in <#${channel.id}>`);
 
-            interaction.editReply({ embeds: [fireEmbed] });
-            await fire.startFire(channel);
+                interaction.editReply({embeds: [fireEmbed]});
+                await fire.startFire(channel);
+                break;
 
-        } else if(subcommand === 'end') {
-            fireEmbed.setDescription(`🔥 Ending fire in <#${channel.id}>`);
+            case 'end':
+                fireEmbed.setDescription(`🔥 Ending fire in <#${channel.id}>`);
 
-            interaction.editReply({ embeds: [fireEmbed] });
-            await fire.endFire(channel);
+                interaction.editReply({embeds: [fireEmbed]});
+                await fire.endFire(channel);
+                break;
 
-        } else if(subcommand === 'endall') {
-            fireEmbed.setDescription(`🔥 Ending all fires in this server`);
+            case 'endall':
+                fireEmbed.setDescription(`🔥 Ending all fires in this server`);
 
-            interaction.editReply({ embeds: [fireEmbed] });
-            fire.endAllFires();
+                interaction.editReply({embeds: [fireEmbed]});
+                fire.endAllFires();
+                break;
 
-        } else if(subcommand === 'setfirelevel') {
+            case 'setfirelevel':
+                const level = interaction.options.getNumber('level');
 
-            const level = interaction.options.getNumber('level');
+                fireEmbed.setDescription(`🔥 Setting fire level in <#${channel.id}> to ${level}`);
 
-            fireEmbed.setDescription(`🔥 Setting fire level in <#${channel.id}> to ${level}`);
+                interaction.editReply({embeds: [fireEmbed]});
+                fire.setFireLevel(channel, level);
+                break;
 
-            interaction.editReply({ embeds: [fireEmbed] });
-            fire.setFireLevel(channel, level);
         }
     }
 };
