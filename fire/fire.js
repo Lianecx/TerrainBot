@@ -118,14 +118,10 @@ async function saveData() {
     const channel = {};
 
     fireChannels.forEach(c => {
-        console.log(c.id)
-
         channel.id = c.id;
         channel.fire = fireLevels.get(c.id) ?? 0;
         channel.water = waterLevels.get(c.id) ?? 0;
         channel.thread = fireThreads.get(c.id).id;
-
-        console.log(channel)
 
         channels.push(channel);
     });
