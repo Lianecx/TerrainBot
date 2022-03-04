@@ -5,6 +5,7 @@ const channelsOnFire = new Map();
 const expansionIntervals = new Map();
 const waterLevels = new Map();
 const fireLevels = new Map();
+const fireThreads = new Map();
 
 const msPerLevel = 2000;
 const maxLevel = 5;
@@ -48,20 +49,24 @@ async function startExpanding(channel) {
         return console.log('Did not find new channel to expand to');
     }
 
-    const thread = await channel.threads.create({
-        name: 'Fire Level',
-        reason: 'Start Fire Expansion',
-    });
-
     const fireLevelEmbed = new Discord.MessageEmbed()
         .setTitle('Current Fire Level')
         .setDescription('⚪'.repeat(maxLevel))
         .setColor('DARK_RED');
 
-    await thread.send({ embeds: [fireLevelEmbed] });
+    //Send embed and create thread
+    const startMessage = await channel.send({ embeds: [fireLevelEmbed] });
+
+    const thread = await channel.threads.create({
+        startMessage,
+        name: 'Fire Level',
+        reason: 'Start Fire Expansion',
+    });
+
+    fireThreads.set(channel.id, thread);
 
     const interval = setInterval(async () => {
-        const currentLevel = fireLevels.get(channel.id);
+        const currentLevel = fireLevels.get(channel.id) ?? 0;
 
         if(currentLevel >= maxLevel) { //Reached max level
             clearInterval(interval); //End Expansion
@@ -75,8 +80,10 @@ async function startExpanding(channel) {
             return console.log('Could not find new channel to expand to'); //End expansion
         }
 
+        //Increase fire level
         setFireLevel(channel, currentLevel+1);
-        console.log(`Expanded in ${channel.name} to level ${currentLevel}`);
+        console.log(`Expanded in ${channel.name} to level ${currentLevel+1}`);
+
     }, msPerLevel);
     expansionIntervals.set(channel.id, interval);
 
@@ -94,6 +101,7 @@ async function endExpanding(channel) {
 
     fireLevels.delete(channel.id);
     waterLevels.delete(channel.id);
+    fireThreads.delete(channel.id);
     clearInterval(interval);
 
     console.log(`Ended expansion in ${channel.name}`);
@@ -102,8 +110,7 @@ async function endExpanding(channel) {
 
 async function addWater(channel) {
     //Increase waterLevels
-    let channelWater = waterLevels.get(channel.id);
-    if(!channelWater) channelWater = 0;
+    let channelWater = waterLevels.get(channel.id) ?? 0;
     channelWater++;
 
     waterLevels.set(channel.id, channelWater);
@@ -111,7 +118,7 @@ async function addWater(channel) {
     if(channelWater >= waterPerLevel) {
         waterLevels.set(channel.id, 0); //Reset waterLevels
 
-        const fireLevel = await channel.threads.cache.find(thread => thread.ownerId === channel.client.user.id).fetchStarterMessage();
+        const fireLevel = await fireThreads.get(channel.id).fetchStarterMessage();
         let fireLevelEmbed = fireLevel.embeds.first();
         const description = fireLevelEmbed.description;
 
@@ -129,13 +136,12 @@ async function addWater(channel) {
 
 
 function setFireLevel(channel, level) {
-    const onFire = channelsOnFire.get(channel.id);
-    if(!onFire || !level) return console.log('Channel is not on fire.');
+    if(!channelsOnFire.get(channel.id) || !level) return console.log('Channel is not on fire.');
     else if(level > maxLevel) return console.log('Specified fire level is too big');
 
     fireLevels.set(channel.id, level);
 
-    const fireLevel = onFire.threads.cache.find(thread => thread.ownerId === channel.client.user.id).fetchStarterMessage();
+    const fireLevel = fireThreads.get(channel.id).fetchStarterMessage();
     const fireLevelEmbed = fireLevel.embeds.first().setDescription('🔥'.repeat(level) + '⚪'.repeat(maxLevel-level));
 
     fireLevel.edit({ embeds: [fireLevelEmbed] });
