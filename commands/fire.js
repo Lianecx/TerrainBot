@@ -55,31 +55,31 @@ module.exports = {
             case 'start':
                 fireEmbed.setDescription(`🔥 Starting fire in <#${channel.id}>`);
 
-                interaction.editReply({embeds: [fireEmbed]});
+                interaction.editReply({ embeds: [fireEmbed] });
                 await fire.startFire(channel);
                 break;
 
             case 'end':
                 fireEmbed.setDescription(`🔥 Ending fire in <#${channel.id}>`);
 
-                interaction.editReply({embeds: [fireEmbed]});
+                interaction.editReply({ embeds: [fireEmbed] });
                 await fire.endFire(channel);
                 break;
 
             case 'endall':
                 fireEmbed.setDescription(`🔥 Ending all fires in this server`);
 
-                interaction.editReply({embeds: [fireEmbed]});
+                interaction.editReply({ embeds: [fireEmbed] });
                 fire.endAllFires();
                 break;
 
             case 'setfirelevel':
                 const level = interaction.options.getNumber('level');
 
-                fireEmbed.setDescription(`🔥 Setting fire level in <#${channel.id}> to ${level}`);
+                fireEmbed.setDescription(`🔥 Setting fire level in <#${channel.id}> to **${level}**`);
 
-                interaction.editReply({embeds: [fireEmbed]});
-                fire.setFireLevel(channel, level);
+                interaction.editReply({ embeds: [fireEmbed] });
+                await fire.setFireLevel(channel, level);
                 break;
 
         }

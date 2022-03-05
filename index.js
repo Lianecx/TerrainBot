@@ -27,7 +27,7 @@ client.once('ready', async () => {
     console.log(`Bot logged in as ${client.user.tag}.`);
     client.user.setActivity('over TheTerrain', { type: 'WATCHING' });
 
-    await fire.loadData(config.guildId);
+    await fire.loadData(client.guilds.cache.get(config.guildId));
 
     const subcountChannel = client.channels.cache.get(config.channels.subcount);
     await youtube.updateSubcount(subcountChannel, config.youtubeId);
@@ -81,7 +81,7 @@ client.on('interactionCreate', async interaction => {
 });
 
 client.on('messageCreate', message => {
-    if(fire.getChannels().has(message.channel.id)) fire.addWater(message.channel);
+    if(fire.getIntervals().has(message.channel.id) && !message.author.bot) fire.addWater(message.channel);
 
     if(message.channel.type === 'DM') {
         if(message.author.id === client.user.id) return;
