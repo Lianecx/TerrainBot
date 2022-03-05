@@ -27,6 +27,7 @@ client.once('ready', async () => {
     console.log(`Bot logged in as ${client.user.tag}.`);
     client.user.setActivity('over TheTerrain', { type: 'WATCHING' });
 
+    fire.setLogChannel(client.channels.cache.get(config.channels.firelog));
     await fire.loadData(client.guilds.cache.get(config.guildId));
 
     const subcountChannel = client.channels.cache.get(config.channels.subcount);

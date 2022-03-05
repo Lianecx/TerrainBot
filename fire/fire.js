@@ -8,30 +8,33 @@ const waterLevels = new Map();
 const fireLevels = new Map();
 const fireThreads = new Map();
 
+//CONFIGURATION
 const msPerLevel = 5000;
 const maxLevel = 5;
 const waterPerLevel = 10;
+const slowmode = 3;
 
+let logChannel;
 
 async function startFire(channel) {
     fireChannels.set(channel.id, channel);
 
     await channel.setName(`🔥${channel.name}🔥`, 'Start Fire');
-    if(channel instanceof Discord.TextChannel) await channel.setRateLimitPerUser(3, 'Start Fire'); //Set 3 sec slowmode
+    if(channel instanceof Discord.TextChannel) await channel.setRateLimitPerUser(slowmode, 'Start Fire'); //Set slowmode
 
-    console.log(`Started fire in ${channel.name}`);
+    sendLog(`Started fire in ${channel.name}`);
     await startExpanding(channel);
 }
 
 async function endFire(channel) {
-    if(!fireChannels.get(channel.id)) return console.log(`${channel.name} is not on fire`);
+    if(!fireChannels.get(channel.id)) return sendLog(`${channel.name} is not on fire`);
 
     await channel.setName(channel.name.replaceAll('🔥', ''), 'End Fire');
     if(channel instanceof Discord.TextChannel) await channel.setRateLimitPerUser(0, 'End Fire'); //Set 0 sec slowmode
 
     fireChannels.delete(channel.id);
 
-    console.log(`Ended fire in ${channel.name}`);
+    sendLog(`Ended fire in ${channel.name}`);
     await endExpanding(channel);
 }
 
@@ -43,9 +46,10 @@ function endAllFires() {
 async function startExpanding(channel) {
     if(!(channel instanceof Discord.TextChannel)) {
         const randChannel = findNewChannel(channel);
-        console.log(`Skipping expansion in ${channel.name}`);
+        sendLog(`Skipping expansion in ${channel.name}`);
         if(randChannel) return startFire(randChannel);
-        return console.log('Did not find new channel to expand to');
+        sendLog('Did not find new channel to expand to');
+        return;
     }
 
     //If fire thread does not exist yet
@@ -86,16 +90,15 @@ async function startExpanding(channel) {
 
     expansionIntervals.set(channel.id, interval);
 
-    console.log(`Started expansion in ${channel.name}`);
+    sendLog(`Started expansion in ${channel.name}`);
 }
 
 async function endExpanding(channel) {
-    if(!(channel instanceof Discord.TextChannel)) return console.log(`Skipping expansion end in ${channel.name}`);
+    if(!(channel instanceof Discord.TextChannel)) return sendLog(`Skipping expansion end in ${channel.name}`);
 
     //Delete Starter Message and Thread
     const thread = fireThreads.get(channel.id);
     const starterMessage = await thread.fetchStarterMessage();
-    console.log(thread, starterMessage);
 
     //Prevent more expansion
     const interval = expansionIntervals.get(channel.id);
@@ -114,7 +117,7 @@ async function endExpanding(channel) {
     fireThreads.delete(channel.id);
 
     saveData();
-    console.log(`Ended expansion in ${channel.name}`);
+    sendLog(`Ended expansion in ${channel.name}`);
 }
 
 
@@ -126,11 +129,11 @@ async function expand(channel) {
 
     const randChannel = findNewChannel(channel);
     if (randChannel) {
-        console.log(`Reached max level in ${channel.name}. Expanding to ${randChannel.name}`);
+        sendLog(`Reached max level in ${channel.name}. Expanding to ${randChannel.name}`);
         return startFire(randChannel);
     }
 
-    console.log('Could not find new channel to expand to');
+    sendLog('Could not find new channel to expand to');
 }
 
 
@@ -149,7 +152,7 @@ async function saveData() {
     });
 
     await fs.writeFile('./fire/channels.json', JSON.stringify(channels, null, 2), 'utf-8');
-    console.log('Saved channels');
+    sendLog('Saved channels');
 }
 
 async function loadData(guild) {
@@ -162,7 +165,7 @@ async function loadData(guild) {
         if(channel.interval) await startExpanding(guild.channels.cache.get(channel.id));
     }
 
-    console.log('Loaded channels');
+    sendLog('Loaded channels');
 }
 
 
@@ -194,7 +197,7 @@ async function addWater(channel) {
         fireLevelEmbed.setDescription(description.substring(0, lastIndex) + '💦' + description.substring(lastIndex + 1));
 
         await fireLevel.edit({ embeds: [fireLevelEmbed] });
-        console.log(`Added water to ${channel.name}`);
+        sendLog(`Added water to ${channel.name}`);
 
         //Reduce fire level after 1 second
         setTimeout(() => setFireLevel(channel, level-1), 1000);
@@ -203,9 +206,9 @@ async function addWater(channel) {
 
 
 async function setFireLevel(channel, level) {
-    if(!fireChannels.get(channel.id) || level === undefined) return console.log('Channel is not on fire.');
-    else if(level > maxLevel) return console.log('Specified fire level is too big');
-    else if(level < 0) return console.log('Specified fire level is too small');
+    if(!fireChannels.get(channel.id) || level === undefined) return sendLog('Channel is not on fire.');
+    else if(level > maxLevel) return sendLog('Specified fire level is too big');
+    else if(level < 0) return sendLog('Specified fire level is too small');
 
     fireLevels.set(channel.id, level);
 
@@ -215,7 +218,7 @@ async function setFireLevel(channel, level) {
     fireLevel.edit({ embeds: [fireLevelEmbed] });
 
     saveData();
-    console.log(`Set fire level in ${channel.name} to ${level}`);
+    sendLog(`Set fire level in ${channel.name} to ${level}`);
 }
 
 
@@ -276,8 +279,18 @@ function sortChannels(guild) {
 }
 
 
+function setLogChannel(channel) {
+    logChannel = channel;
+}
+
+function sendLog(content) {
+    console.log(content);
+    logChannel.send(content);
+}
+
+
 function getIntervals() {
     return expansionIntervals;
 }
 
-module.exports = { startFire, endFire, endAllFires, loadData, getIntervals, addWater, setFireLevel };
+module.exports = { startFire, endFire, endAllFires, loadData, getIntervals, addWater, setFireLevel, setLogChannel };
