@@ -17,7 +17,7 @@ async function startFire(channel) {
     fireChannels.set(channel.id, channel);
 
     await channel.setName(`🔥${channel.name}🔥`, 'Start Fire');
-    if(channel instanceof Discord.TextChannel) await channel.setRateLimitPerUser(3, 'Start Fire'); //Slowmode
+    if(channel instanceof Discord.TextChannel) await channel.setRateLimitPerUser(3, 'Start Fire'); //Set 3 sec slowmode
 
     console.log(`Started fire in ${channel.name}`);
     await startExpanding(channel);
@@ -27,7 +27,7 @@ async function endFire(channel) {
     if(!fireChannels.get(channel.id)) return console.log(`${channel.name} is not on fire`);
 
     await channel.setName(channel.name.replaceAll('🔥', ''), 'End Fire');
-    if(channel instanceof Discord.TextChannel) await channel?.setRateLimitPerUser(0, 'End Fire'); //Slowmode
+    if(channel instanceof Discord.TextChannel) await channel.setRateLimitPerUser(0, 'End Fire'); //Set 0 sec slowmode
 
     fireChannels.delete(channel.id);
 
@@ -90,12 +90,19 @@ async function startExpanding(channel) {
 }
 
 async function endExpanding(channel) {
-    const interval = expansionIntervals.get(channel.id);
-    if(!interval) return console.log(`${channel.name} is not expanding`);
+    if(!(channel instanceof Discord.TextChannel)) return console.log(`Skipping expansion end in ${channel.name}`);
 
     //Delete Starter Message and Thread
     const thread = fireThreads.get(channel.id);
     const starterMessage = await thread.fetchStarterMessage();
+    console.log(thread, starterMessage);
+
+    //Prevent more expansion
+    const interval = expansionIntervals.get(channel.id);
+    if(interval) {
+        clearInterval(interval);
+        expansionIntervals.delete(channel.id);
+    }
 
     await starterMessage.delete();
     await thread.delete('End Fire Expansion');
@@ -105,8 +112,6 @@ async function endExpanding(channel) {
     fireLevels.delete(channel.id);
     waterLevels.delete(channel.id);
     fireThreads.delete(channel.id);
-    expansionIntervals.delete(channel.id);
-    clearInterval(interval);
 
     saveData();
     console.log(`Ended expansion in ${channel.name}`);
@@ -114,7 +119,7 @@ async function endExpanding(channel) {
 
 
 async function expand(channel) {
-    clearInterval(expansionIntervals.get(channel.id)); //End Expanding
+    clearInterval(expansionIntervals.get(channel.id)); //End Expanding in old channel
     expansionIntervals.delete(channel.id);
 
     await channel.permissionOverwrites.edit(config.roles.Member, { SEND_MESSAGES: false }); //Lock Channel
@@ -219,7 +224,7 @@ function findNewChannel(channel) {
     let index = sortedChannels.findIndex(id => id === channel.id);
 
     //index+1 or index-1
-    let randIndex = Math.floor(Math.random() * (index+1 - index)) + index-1;
+    let randIndex = Math.random() < 0.5 ? index-1 : index+1;
 
     let randChannel = channel.guild.channels.cache.get(sortedChannels[randIndex]);
     if(!randChannel) {
