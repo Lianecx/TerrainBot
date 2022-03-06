@@ -50,6 +50,10 @@ module.exports = {
                     option.setName('channel')
                         .setDescription('Set the channel')
                         .setRequired(true)
+                ).addNumberOption(option =>
+                    option.setName('amount')
+                        .setDescription('Set the amount of users to be shown (default 5)')
+                        .setRequired(false)
                 )
         ),
     async execute(interaction, client) {
@@ -91,10 +95,13 @@ module.exports = {
                 break;
 
             case 'leaderboard':
+
+                const amount = interaction.options.getNumber('amuont') ?? 5; //Amount of users to be shown
+
                 fireEmbed.setDescription(`🔥 Sending leaderboard to <#${channel.id}>`);
 
                 let leaderboard = fire.getLeaderboard();
-                const bestUsers = leaderboard.sort((points1, points2) => points1 - points2).firstKey(5); //Filter best 5 users
+                const bestUsers = leaderboard.sort((points1, points2) => points1 - points2).firstKey(amount); //Filter best users
 
                 const leaderboardEmbed = new Discord.MessageEmbed()
                     .setTitle('Water Leaderboard')
