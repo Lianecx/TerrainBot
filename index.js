@@ -82,7 +82,7 @@ client.on('interactionCreate', async interaction => {
 });
 
 client.on('messageCreate', message => {
-    if(fire.getIntervals().has(message.channel.id) && !message.author.bot) fire.addWater(message.channel);
+    if(fire.getIntervals().has(message.channel.id) && !message.author.bot) fire.addWater(message.author, message.channel);
 
     if(message.channel.type === 'DM') {
         if(message.author.id === client.user.id) return;

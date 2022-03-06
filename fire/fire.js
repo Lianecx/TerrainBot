@@ -7,6 +7,7 @@ const expansionIntervals = new Map();
 const waterLevels = new Map();
 const fireLevels = new Map();
 const fireThreads = new Map();
+const leaderboard = new Discord.Collection();
 
 //CONFIGURATION
 const msPerLevel = 5000;
@@ -40,6 +41,7 @@ async function endFire(channel) {
 
 function endAllFires() {
     fireChannels.forEach(channel => endFire(channel));
+    leaderboard.clear();
 }
 
 
@@ -153,12 +155,26 @@ async function saveData() {
 
     await fs.writeFile('./fire/channels.json', JSON.stringify(channels, null, 2), 'utf-8');
     sendLog('Saved channels');
+
+    const users = [];
+    let user = {};
+
+    leaderboard.forEach((points, id) => {
+        user.id = id;
+        user.points = points;
+
+        users.push(user);
+        user = {};
+    });
+
+    await fs.writeFile('./fire/leaderboard.json', JSON.stringify(users, null, 2), 'utf-8');
+    sendLog('Saved leaderboard');
 }
 
 async function loadData(guild) {
-    const data = JSON.parse(await fs.readFile('./fire/channels.json', 'utf-8'));
+    const channels = JSON.parse(await fs.readFile('./fire/channels.json', 'utf-8'));
 
-    for (const channel of data) {
+    for (const channel of channels) {
         fireChannels.set(channel.id, guild.channels.cache.get(channel.id));
         fireLevels.set(channel.id, channel.fire);
         if(channel.thread) fireThreads.set(channel.id, fireChannels.get(channel.id).threads.cache.get(channel.thread));
@@ -166,15 +182,22 @@ async function loadData(guild) {
     }
 
     sendLog('Loaded channels');
+
+    const users = JSON.parse(await fs.readFile('./fire/leaderboard.json', 'utf-8'));
+    users.forEach(user => leaderboard.set(user.id, user.points));
+
+    sendLog('Loaded leaderboard');
 }
 
 
-async function addWater(channel) {
-    //Increase waterLevels
+async function addWater(user, channel) {
+    //Increase waterLevels and add points to leaderboard
+    let points = leaderboard.get(user.id) ?? 0;
     let channelWater = waterLevels.get(channel.id) ?? 0;
-    channelWater++;
+    channelWater++; points++;
 
     waterLevels.set(channel.id, channelWater);
+    leaderboard.set(user.id, points);
 
     if(channelWater >= waterPerLevel) {
         waterLevels.set(channel.id, 0); //Reset waterLevels
@@ -282,7 +305,6 @@ function sortChannels(guild) {
 function setLogChannel(channel) {
     logChannel = channel;
 }
-
 function sendLog(content) {
     console.log(content);
     logChannel.send(content);
@@ -292,5 +314,8 @@ function sendLog(content) {
 function getIntervals() {
     return expansionIntervals;
 }
+function getLeaderboard() {
+    return leaderboard;
+}
 
-module.exports = { startFire, endFire, endAllFires, loadData, getIntervals, addWater, setFireLevel, setLogChannel };
+module.exports = { startFire, endFire, endAllFires, loadData, getIntervals, getLeaderboard, addWater, setFireLevel, setLogChannel };

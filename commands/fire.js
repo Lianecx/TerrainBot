@@ -43,6 +43,14 @@ module.exports = {
                         .setDescription('Set the level')
                         .setRequired(true)
                 )
+        ).addSubcommand(subcommand =>
+            subcommand.setName('leaderboard')
+                .setDescription('Send the leaderboard to a specified channel')
+                .addChannelOption(option =>
+                    option.setName('channel')
+                        .setDescription('Set the channel')
+                        .setRequired(true)
+                )
         ),
     async execute(interaction, client) {
         const subcommand = interaction.options.getSubcommand();
@@ -80,6 +88,26 @@ module.exports = {
 
                 interaction.editReply({ embeds: [fireEmbed] });
                 await fire.setFireLevel(channel, level);
+                break;
+
+            case 'leaderboard':
+                fireEmbed.setDescription(`🔥 Sending leaderboard to <#${channel.id}>`);
+
+                let leaderboard = fire.getLeaderboard();
+                const bestUsers = leaderboard.sort((points1, points2) => points1 - points2).firstKey(5); //Filter best 5 users
+
+                const leaderboardEmbed = new Discord.MessageEmbed()
+                    .setTitle('Water Leaderboard')
+                    .setDescription(`Leaderboard of the ${bestUsers.size} users who contributed the most.`);
+
+                bestUsers.forEach(userId => {
+                    const user = client.users.cache.get(userId);
+                    const points = leaderboard.get(userId);
+                    if(user) leaderboardEmbed.addField(user.tag, `has contributed **${points}** water buckets.`)
+                });
+
+                interaction.editReply({ embeds: [fireEmbed] });
+                channel.send({ embeds: [leaderboardEmbed] });
                 break;
 
         }
