@@ -10,9 +10,9 @@ const fireThreads = new Map();
 const leaderboard = new Discord.Collection();
 
 //CONFIGURATION
-const msPerLevel = 5000;
+const msPerLevel = 300000;
 const maxLevel = 5;
-const waterPerLevel = 10;
+const waterPerLevel = 60;
 const slowmode = 3;
 
 let logChannel;
@@ -75,7 +75,6 @@ async function startExpanding(channel) {
         fireThreads.set(channel.id, thread);
     }
 
-    saveData();
     const interval = setInterval(async () => {
         const currentLevel = fireLevels.get(channel.id) ?? 1;
 
@@ -92,6 +91,7 @@ async function startExpanding(channel) {
 
     expansionIntervals.set(channel.id, interval);
 
+    saveData();
     sendLog(`Started expansion in ${channel.name}`);
 }
 
@@ -189,6 +189,10 @@ async function loadData(guild) {
     sendLog('Loaded leaderboard');
 }
 
+function saveDataInterval(ms) {
+    setInterval(saveData, ms);
+}
+
 
 async function addWater(user, channel) {
     //Increase waterLevels and add points to leaderboard
@@ -206,7 +210,7 @@ async function addWater(user, channel) {
         let fireLevelEmbed = fireLevel.embeds[0];
         const description = fireLevelEmbed.description;
 
-        const level = fireLevels.get(channel.id);
+        const level = fireLevels.get(channel.id) ?? 0;
         if(level === 0) {
             //Put out fire
             fireLevelEmbed.setDescription('💦'.repeat(maxLevel));
@@ -229,7 +233,8 @@ async function addWater(user, channel) {
 
 
 async function setFireLevel(channel, level) {
-    if(!fireChannels.get(channel.id) || level === undefined) return sendLog('Channel is not on fire.');
+    if(!fireChannels.get(channel.id)) return sendLog('Channel is not on fire.');
+    else if(isNaN(level)) return sendLog('Specified fire level is NaN');
     else if(level > maxLevel) return sendLog('Specified fire level is too big');
     else if(level < 0) return sendLog('Specified fire level is too small');
 
@@ -318,4 +323,4 @@ function getLeaderboard() {
     return leaderboard;
 }
 
-module.exports = { startFire, endFire, endAllFires, loadData, getIntervals, getLeaderboard, addWater, setFireLevel, setLogChannel };
+module.exports = { startFire, endFire, endAllFires, loadData, saveDataInterval, getIntervals, getLeaderboard, addWater, setFireLevel, setLogChannel };

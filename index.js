@@ -29,6 +29,7 @@ client.once('ready', async () => {
 
     fire.setLogChannel(client.channels.cache.get(config.channels.firelog));
     await fire.loadData(client.guilds.cache.get(config.guildId));
+    await fire.saveDataInterval(10000);
 
     const subcountChannel = client.channels.cache.get(config.channels.subcount);
     await youtube.updateSubcount(subcountChannel, config.youtubeId);
