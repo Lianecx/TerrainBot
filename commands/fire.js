@@ -45,7 +45,7 @@ module.exports = {
                 )
         ).addSubcommand(subcommand =>
             subcommand.setName('leaderboard')
-                .setDescription('Send the leaderboard to a specified channel')
+                .setDescription('Send a leaderboard of the most helpful users to a specified channel')
                 .addChannelOption(option =>
                     option.setName('channel')
                         .setDescription('Set the channel')
