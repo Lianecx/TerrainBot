@@ -48,9 +48,13 @@ function endAllFires() {
 async function startExpanding(channel) {
     if(!(channel instanceof Discord.TextChannel)) {
         const randChannel = findNewChannel(channel);
-        sendLog(`Skipping expansion in ${channel.name}`);
-        if(randChannel) return startFire(randChannel);
-        sendLog('Did not find new channel to expand to');
+        if(!randChannel) return sendLog('Did not find new channel to expand to');
+
+        //Skip channel after one interval
+        setTimeout(() => {
+            sendLog(`Skipping expansion in ${channel.name}`);
+            startFire(randChannel);
+        }, msPerLevel);
         return;
     }
 
