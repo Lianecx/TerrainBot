@@ -55,6 +55,9 @@ module.exports = {
                         .setDescription('Set the amount of users to be shown (default 5)')
                         .setRequired(false)
                 )
+        ).addSubcommand(subcommand =>
+            subcommand.setName('clearleaderboard')
+                .setDescription('Clear the leaderboard')
         ),
     async execute(interaction, client) {
         const subcommand = interaction.options.getSubcommand();
@@ -96,27 +99,42 @@ module.exports = {
 
             case 'leaderboard':
 
-                const amount = interaction.options.getNumber('amuont') ?? 5; //Amount of users to be shown
+                const amount = interaction.options.getNumber('amount') ?? 5; //Amount of users to be shown
 
                 fireEmbed.setDescription(`🔥 Sending leaderboard to <#${channel.id}>`);
 
                 let leaderboard = fire.getLeaderboard();
-                const bestUsers = leaderboard.sort((points1, points2) => points1 - points2).firstKey(amount); //Filter best users
+                const bestUsers = leaderboard.sort((points1, points2) => points2 - points1).firstKey(amount); //Filter best users
 
                 const leaderboardEmbed = new Discord.MessageEmbed()
                     .setTitle('Water Leaderboard')
                     .setDescription(`Leaderboard of the ${bestUsers.size} users who contributed the most.`);
 
-                bestUsers.forEach(userId => {
+                for (const userId of bestUsers) {
+                    const index = bestUsers.indexOf(userId);
                     const user = client.users.cache.get(userId);
                     const points = leaderboard.get(userId);
-                    if(user) leaderboardEmbed.addField(user.tag, `has contributed **${points}** water buckets.`)
-                });
+
+                    if(!user) continue;
+                    //Add emojis for 1st, 2nd and 3rd place
+                    let title = `${index+1}. ${user.tag}`;
+                    if(index === 0) title = '🏆 ' + title;
+                    if(index === 1) title = '🥈 ' + title;
+                    if(index === 2) title = '🥉 ' + title;
+
+                    leaderboardEmbed.addField(title, `has contributed **${points}** water buckets.`);
+                }
 
                 interaction.editReply({ embeds: [fireEmbed] });
                 channel.send({ embeds: [leaderboardEmbed] });
                 break;
 
+            case 'clearleaderboard':
+                fireEmbed.setDescription('🔥 Clearing leaderboard');
+                interaction.editReply({ embeds: [fireEmbed] });
+
+                fire.clearLeaderboard();
+                break;
         }
     }
 };

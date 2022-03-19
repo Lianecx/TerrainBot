@@ -10,7 +10,7 @@ const fireThreads = new Map();
 const leaderboard = new Discord.Collection();
 
 //CONFIGURATION
-const msPerLevel = 300000;
+const msPerLevel = 210000;
 const maxLevel = 5;
 const waterPerLevel = 60;
 const slowmode = 3;
@@ -40,8 +40,7 @@ async function endFire(channel) {
 }
 
 function endAllFires() {
-    fireChannels.forEach(channel => endFire(channel));
-    leaderboard.clear();
+    fireChannels.forEach(endFire);
 }
 
 
@@ -326,5 +325,9 @@ function getIntervals() {
 function getLeaderboard() {
     return leaderboard;
 }
+function clearLeaderboard() {
+    leaderboard.clear();
+    saveData();
+}
 
-module.exports = { startFire, endFire, endAllFires, loadData, saveDataInterval, getIntervals, getLeaderboard, addWater, setFireLevel, setLogChannel };
+module.exports = { startFire, endFire, endAllFires, loadData, saveDataInterval, getIntervals, getLeaderboard, clearLeaderboard, addWater, setFireLevel, setLogChannel };
