@@ -12,6 +12,7 @@ module.exports = {
     data: new SlashCommandBuilder()
         .setName('fire')
         .setDescription('Manage the fire incident')
+        .setDefaultPermission(false)
         .addSubcommand(subcommand =>
             subcommand.setName('start')
                 .setDescription('Start a fire in a specific channel')
