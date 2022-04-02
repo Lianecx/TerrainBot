@@ -103,7 +103,7 @@ module.exports = {
 
                 fireEmbed.setDescription(`🔥 Sending leaderboard to <#${channel.id}>`);
 
-                let leaderboard = fire.getLeaderboard();
+                const leaderboard = fire.getLeaderboard();
                 const bestUsers = leaderboard.sort((points1, points2) => points2 - points1).firstKey(amount); //Filter best users
 
                 const leaderboardEmbed = new Discord.MessageEmbed()
@@ -112,7 +112,7 @@ module.exports = {
 
                 for (const userId of bestUsers) {
                     const index = bestUsers.indexOf(userId);
-                    const user = client.users.cache.get(userId);
+                    const user = await client.users.fetch(userId);
                     const points = leaderboard.get(userId);
 
                     if(!user) continue;
